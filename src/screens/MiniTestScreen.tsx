@@ -10,6 +10,7 @@ import {
   Easing,
   useWindowDimensions,
   Share,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -148,8 +149,6 @@ export default function MiniTestScreen({ navigation }: any) {
   const [correctCount, setCorrectCount] = useState<number>(0);
   const [earnedThisRun, setEarnedThisRun] = useState<number>(0);
 
-  const [duckError, setDuckError] = useState<boolean>(false);
-
   const startFade = useRef(new Animated.Value(1)).current;
   const startPop = useRef(new Animated.Value(1)).current;
 
@@ -174,8 +173,8 @@ export default function MiniTestScreen({ navigation }: any) {
 
     const titleSize = isMini ? 18 : isTiny ? 19 : 20;
 
-    const duckSize = clamp(Math.round(width * (isMini ? 0.52 : isTiny ? 0.58 : 0.64)), 170, 320);
-    const minDuckZoneH = clamp(Math.round(duckSize * 1.05), 190, 380);
+    const duckSize = clamp(Math.round(width * (isMini ? 0.56 : isTiny ? 0.60 : 0.66)), 180, 340);
+    const duckZoneH = clamp(Math.round(duckSize * 1.08), 210, 420);
 
     const cardW = Math.min(460, Math.round(width * (isMini ? 0.92 : 0.9)));
     const qBoxPadV = isMini ? 10 : 12;
@@ -193,7 +192,7 @@ export default function MiniTestScreen({ navigation }: any) {
       safeBottom,
       titleSize,
       duckSize,
-      minDuckZoneH,
+      duckZoneH,
       cardW,
       qBoxPadV,
       qFont,
@@ -272,12 +271,7 @@ export default function MiniTestScreen({ navigation }: any) {
       setFeathersTotal(nextTotal);
 
       plus.setValue(0);
-      Animated.timing(plus, {
-        toValue: 1,
-        duration: 420,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start();
+      Animated.timing(plus, { toValue: 1, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
     }
 
     setTimeout(() => {
@@ -323,31 +317,21 @@ export default function MiniTestScreen({ navigation }: any) {
     </View>
   );
 
-  const DuckFallback = () => (
-    <View style={[styles.duckFallback, { width: sizes.duckSize, height: sizes.duckSize }]}>
-      <Text style={styles.duckFallbackText}>?</Text>
-    </View>
-  );
-
   const StartView = () => (
     <ImageBackground source={ASSETS.bg} style={styles.bg} resizeMode="cover">
       <View pointerEvents="none" style={styles.dimStart} />
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <TopBar />
 
-        <View style={[styles.center, { minHeight: sizes.minDuckZoneH }]}>
-          <Animated.View style={{ opacity: startFade, transform: [{ scale: startPop }], flexShrink: 0 }}>
-            {duckError ? (
-              <DuckFallback />
-            ) : (
-              <Image
-                source={ASSETS.duck}
-                style={{ width: sizes.duckSize, height: sizes.duckSize }}
-                resizeMode="contain"
-                fadeDuration={0}
-                onError={() => setDuckError(true)}
-              />
-            )}
+        <View style={[styles.duckCenterZone, { height: sizes.duckZoneH }]}>
+          <Animated.View style={{ opacity: startFade, transform: [{ scale: startPop }] }}>
+            <Image
+              key="duck_local_asset"
+              source={ASSETS.duck}
+              style={{ width: sizes.duckSize, height: sizes.duckSize, alignSelf: 'center' }}
+              resizeMode="contain"
+              {...(Platform.OS === 'ios' ? { defaultSource: ASSETS.duck } : {})}
+            />
           </Animated.View>
         </View>
 
@@ -464,7 +448,7 @@ export default function MiniTestScreen({ navigation }: any) {
       <ImageBackground source={bgImg} style={styles.bg} resizeMode="cover">
         <View pointerEvents="none" style={styles.dimResult} />
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-          <View style={[styles.resultCenter, { paddingTop: Math.max(20, insets.top + 20 - TOP_LIFT) }]}>
+          <View style={[styles.resultCenter, { paddingTop: Math.max(20, insets.top + 20 - 10) }]}>
             <Text style={styles.resultTitle}>{title}</Text>
             <Text style={styles.resultSub}>{sub}</Text>
           </View>
@@ -550,30 +534,14 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
   },
 
-  center: {
+  duckCenterZone: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
   },
-  bottomStart: { alignItems: 'center', justifyContent: 'flex-end' },
 
-  duckFallback: {
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderWidth: 2,
-    borderColor: 'rgba(255,214,130,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  duckFallbackText: {
-    color: 'rgba(255,255,255,0.85)',
-    fontWeight: '900',
-    fontSize: 42,
-    textShadowColor: 'rgba(0,0,0,0.75)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 12,
-  },
+  bottomStart: { alignItems: 'center', justifyContent: 'flex-end' },
 
   quizWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 14 },
 
@@ -587,11 +555,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  questionText: {
-    color: 'rgba(25,16,10,0.95)',
-    fontWeight: '900',
-    textAlign: 'center',
-  },
+  questionText: { color: 'rgba(25,16,10,0.95)', fontWeight: '900', textAlign: 'center' },
 
   answerBtn: {
     borderRadius: 18,

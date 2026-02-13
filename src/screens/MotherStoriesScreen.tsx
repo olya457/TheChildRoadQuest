@@ -16,7 +16,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 const ASSETS = {
   bg: require('../assets/cq_play_bg.png'),
   back: require('../assets/back_arrow.png'),
-
   s1: require('../assets/story_1.png'),
   s2: require('../assets/story_2.png'),
   s3: require('../assets/story_3.png'),
@@ -96,13 +95,36 @@ export default function MotherStoriesScreen({ navigation }: any) {
     btnLift.setValue(8);
 
     Animated.parallel([
-      Animated.timing(fade, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.timing(pop, { toValue: 1, duration: 260, easing: Easing.out(Easing.back(1.05)), useNativeDriver: true }),
-
-      Animated.timing(imgFade, { toValue: 1, duration: 320, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.timing(imgPop, { toValue: 1, duration: 360, easing: Easing.out(Easing.back(1.25)), useNativeDriver: true }),
-
-      Animated.timing(btnLift, { toValue: 0, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(pop, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.back(1.05)),
+        useNativeDriver: true,
+      }),
+      Animated.timing(imgFade, {
+        toValue: 1,
+        duration: 320,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(imgPop, {
+        toValue: 1,
+        duration: 360,
+        easing: Easing.out(Easing.back(1.25)),
+        useNativeDriver: true,
+      }),
+      Animated.timing(btnLift, {
+        toValue: 0,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
@@ -122,22 +144,33 @@ export default function MotherStoriesScreen({ navigation }: any) {
 
     const headerSize = isMini ? 18 : isTiny ? 19 : 20;
 
-    const cardW = Math.min(460, Math.round(width * (isMini ? 0.92 : isTiny ? 0.90 : 0.88)));
+    const cardW = Math.min(460, Math.round(width * (isMini ? 0.92 : isTiny ? 0.9 : 0.88)));
     const cardH = clamp(Math.round(height * (isMini ? 0.42 : isTiny ? 0.44 : 0.46)), 290, 430);
 
     const titleSize = isMini ? 14 : isTiny ? 15 : 16;
     const textSize = isMini ? 12 : isTiny ? 13 : 14;
 
-    const imgSize = clamp(Math.round(cardW * (isMini ? 0.48 : isTiny ? 0.50 : 0.52)), 165, 240);
-    const imgRadius = 50;
-
-    const btnW = Math.min(190, Math.round((cardW - 18) / 2));
-    const btnH = isMini ? 40 : isTiny ? 42 : 44;
-
     const cardPadH = isMini ? 16 : 18;
     const cardPadTop = isMini ? 14 : 16;
 
     const textLineHeight = isMini ? 17 : isTiny ? 18 : 19;
+
+    const btnW = Math.min(190, Math.round((cardW - 18) / 2));
+    const btnH = isMini ? 40 : isTiny ? 42 : 44;
+
+    const titleLines = 2;
+    const textLines = 8;
+
+    const approxTitleH = Math.ceil(titleSize * 1.25) * titleLines;
+    const approxTextH = textLineHeight * textLines;
+    const fixedTopH = cardPadTop + approxTitleH + 10 + approxTextH;
+
+    const reservedBottom = isMini ? 10 : 12;
+    const availableForImage = Math.max(90, cardH - fixedTopH - reservedBottom);
+
+    const desiredImg = Math.round(cardW * (isMini ? 0.48 : isTiny ? 0.5 : 0.52));
+    const imgSize = clamp(desiredImg, 120, Math.floor(availableForImage));
+    const imgRadius = Math.round(imgSize * 0.28);
 
     return {
       safeTop,
@@ -154,6 +187,7 @@ export default function MotherStoriesScreen({ navigation }: any) {
       cardPadH,
       cardPadTop,
       textLineHeight,
+      availableForImage,
     };
   }, [width, height, insets.top, insets.bottom, isTiny, isMini]);
 
@@ -208,14 +242,14 @@ export default function MotherStoriesScreen({ navigation }: any) {
               {story.text}
             </Text>
 
-            <View style={styles.cardImageWrap}>
+            <View style={[styles.cardImageWrap, { minHeight: sizes.availableForImage }]}>
               <Animated.View style={{ opacity: imgFade, transform: [{ scale: imgPop }] }}>
                 <Image
                   source={story.image}
                   style={{
                     width: sizes.imgSize,
                     height: sizes.imgSize,
-                    borderRadius: sizes.imgRadius, 
+                    borderRadius: sizes.imgRadius,
                   }}
                   resizeMode="cover"
                 />

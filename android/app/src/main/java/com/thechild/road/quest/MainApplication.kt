@@ -1,4 +1,4 @@
-package com.thechildroadquest
+package com.thechild.road.quest
 
 import android.app.Application
 import com.facebook.react.PackageList

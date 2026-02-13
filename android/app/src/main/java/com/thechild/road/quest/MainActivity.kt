@@ -1,4 +1,4 @@
-package com.thechildroadquest
+package com.thechild.road.quest
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

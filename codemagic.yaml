@@ -8,12 +8,12 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.heghoetato.jgahohgiype
+        bundle_identifier: com.fokertyghertyf.jiokertyghfbas
       vars:
-        APP_STORE_APPLE_ID: 6756238326
-        BUNDLE_ID: 'com.heghoetato.jgahohgiype'
-        XCODE_WORKSPACE: 'LettoMaxChoiceType.xcworkspace'
-        XCODE_SCHEME: 'LettoMaxChoiceType'
+        APP_STORE_APPLE_ID: 6759208015
+        BUNDLE_ID: 'com.fokertyghertyf.jiokertyghfbas'
+        XCODE_WORKSPACE: 'TheChildRoadQuest.xcworkspace'
+        XCODE_SCHEME: 'TheChildRoadQuest'
     scripts:
       - name: Install node modules
         script: |
@@ -50,4 +50,4 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_app_store: true
-        copyright: VESA ENSIO LAHDEMAKI
+        copyright: Frida Abel

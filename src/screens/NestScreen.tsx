@@ -13,19 +13,19 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_FEATHERS = 'feathers_total_v1';
-const STORAGE_NEST_LEVEL = 'nest_level_v1'; 
-const STORAGE_QUIZ_PERFECT = 'quiz_perfect_unlock_v1'; 
+const STORE_FEATHERS = 'wt.core.feathers.v1';
+const STORE_SANCTUARY_LEVEL = 'wt.sanctuary.level.v1';
+const STORE_UNLOCK_BOOST = 'wt.core.unlockBoost.v1';
 
 const ASSETS = {
   back: require('../assets/back_arrow.png'),
 
-  nestBg1: require('../assets/nest_1.png'),
-  nestBg2: require('../assets/nest_2.png'),
-  nestBg3: require('../assets/nest_3.png'),
-  nestBg4: require('../assets/nest_4.png'),
+  sanctuaryBg1: require('../assets/nest_1.png'),
+  sanctuaryBg2: require('../assets/nest_2.png'),
+  sanctuaryBg3: require('../assets/nest_3.png'),
+  sanctuaryBg4: require('../assets/nest_4.png'),
 
-  eggGold: require('../assets/egg_gold.png'),
+  bonusGold: require('../assets/bonus_gold.png'),
 };
 
 function clamp(n: number, a: number, b: number) {
@@ -58,26 +58,26 @@ async function getBool(key: string) {
 }
 
 async function addFeathers(delta: number) {
-  const cur = await getInt(STORAGE_FEATHERS, 0);
+  const cur = await getInt(STORE_FEATHERS, 0);
   const next = Math.max(0, cur + Math.floor(delta));
-  await setInt(STORAGE_FEATHERS, next);
+  await setInt(STORE_FEATHERS, next);
   return next;
 }
 
 type Level = 1 | 2 | 3 | 4;
 
 const LEVEL_BG: Record<Level, any> = {
-  1: ASSETS.nestBg1,
-  2: ASSETS.nestBg2,
-  3: ASSETS.nestBg3,
-  4: ASSETS.nestBg4,
+  1: ASSETS.sanctuaryBg1,
+  2: ASSETS.sanctuaryBg2,
+  3: ASSETS.sanctuaryBg3,
+  4: ASSETS.sanctuaryBg4,
 };
 
 function getCostToNext(level: Level) {
   return level === 4 ? 0 : 20;
 }
 
-export default function NestScreen({ navigation }: any) {
+export default function Sanctuary({ navigation }: any) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -89,7 +89,7 @@ export default function NestScreen({ navigation }: any) {
   const [feathers, setFeathers] = useState(0);
   const [level, setLevel] = useState<Level>(1);
 
-  const [eggUnlocked, setEggUnlocked] = useState(false);
+  const [bonusUnlocked, setBonusUnlocked] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -99,7 +99,7 @@ export default function NestScreen({ navigation }: any) {
   const bgFadeNext = useRef(new Animated.Value(0)).current;
   const bgScale = useRef(new Animated.Value(1)).current;
 
-  const eggPop = useRef(new Animated.Value(0)).current;
+  const bonusPop = useRef(new Animated.Value(0)).current;
 
   const modalFade = useRef(new Animated.Value(0)).current;
 
@@ -123,7 +123,7 @@ export default function NestScreen({ navigation }: any) {
     const btnW = Math.min(360, Math.round(width * 0.72));
     const btnH = isMini ? 44 : isTiny ? 48 : 52;
 
-    const eggSize = clamp(Math.round(width * (isMini ? 0.28 : 0.30)), 72, 120);
+    const bonusSize = clamp(Math.round(width * (isMini ? 0.28 : 0.3)), 72, 120);
 
     const modalW = Math.min(420, Math.round(width * 0.82));
     const modalPad = isMini ? 12 : 14;
@@ -137,7 +137,7 @@ export default function NestScreen({ navigation }: any) {
       pillMinW,
       btnW,
       btnH,
-      eggSize,
+      bonusSize,
       modalW,
       modalPad,
       bottomPad,
@@ -146,9 +146,9 @@ export default function NestScreen({ navigation }: any) {
 
   const goBack = () => navigation?.goBack?.();
 
-  const animateEgg = () => {
-    eggPop.setValue(0);
-    Animated.timing(eggPop, {
+  const animateBonus = () => {
+    bonusPop.setValue(0);
+    Animated.timing(bonusPop, {
       toValue: 1,
       duration: 520,
       easing: Easing.out(Easing.back(1.35)),
@@ -157,17 +157,17 @@ export default function NestScreen({ navigation }: any) {
   };
 
   const load = async () => {
-    const [f, lvlRaw, egg] = await Promise.all([
-      getInt(STORAGE_FEATHERS, 0),
-      getInt(STORAGE_NEST_LEVEL, 1),
-      getBool(STORAGE_QUIZ_PERFECT),
+    const [f, lvlRaw, bonus] = await Promise.all([
+      getInt(STORE_FEATHERS, 0),
+      getInt(STORE_SANCTUARY_LEVEL, 1),
+      getBool(STORE_UNLOCK_BOOST),
     ]);
 
     const lvl = clamp(lvlRaw, 1, 4) as Level;
 
     setFeathers(f);
     setLevel(lvl);
-    setEggUnlocked(egg);
+    setBonusUnlocked(bonus);
 
     setBgCurrent(LEVEL_BG[lvl]);
     setBgNext(null);
@@ -179,7 +179,7 @@ export default function NestScreen({ navigation }: any) {
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      if (egg) animateEgg();
+      if (bonus) animateBonus();
     });
   };
 
@@ -189,9 +189,9 @@ export default function NestScreen({ navigation }: any) {
 
   useEffect(() => {
     const unsub = navigation?.addListener?.('focus', async () => {
-      const egg = await getBool(STORAGE_QUIZ_PERFECT);
-      setEggUnlocked(egg);
-      if (egg) animateEgg();
+      const bonus = await getBool(STORE_UNLOCK_BOOST);
+      setBonusUnlocked(bonus);
+      if (bonus) animateBonus();
     });
     return unsub;
   }, [navigation]);
@@ -258,14 +258,14 @@ export default function NestScreen({ navigation }: any) {
     if (level === 4) return;
 
     const cost = getCostToNext(level);
-    const curFeathers = await getInt(STORAGE_FEATHERS, 0);
+    const curFeathers = await getInt(STORE_FEATHERS, 0);
     if (curFeathers < cost) return;
 
     const after = await addFeathers(-cost);
     setFeathers(after);
 
     const nextLevel = clamp(level + 1, 1, 4) as Level;
-    await setInt(STORAGE_NEST_LEVEL, nextLevel);
+    await setInt(STORE_SANCTUARY_LEVEL, nextLevel);
     setLevel(nextLevel);
 
     animateBgSwap(nextLevel);
@@ -283,7 +283,7 @@ export default function NestScreen({ navigation }: any) {
     return (
       <View style={styles.modalOverlay}>
         <Animated.View style={[styles.modalCard, { width: sizes.modalW, padding: sizes.modalPad, opacity: modalFade }]}>
-          <Text style={styles.modalTitle}>Upgrade the nest?</Text>
+          <Text style={styles.modalTitle}>Improve this space?</Text>
           <View style={{ height: 10 }} />
           <Text style={styles.modalSub}>
             Cost: <Text style={styles.modalStrong}>{cost}</Text> feathers
@@ -331,35 +331,41 @@ export default function NestScreen({ navigation }: any) {
       <View pointerEvents="none" style={styles.dim} />
 
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <Animated.View style={[styles.topBar, { paddingTop: sizes.safeTop, opacity: uiOpacity, transform: [{ translateY: uiTranslate }] }]}>
+        <Animated.View
+          style={[
+            styles.topBar,
+            { paddingTop: sizes.safeTop, opacity: uiOpacity, transform: [{ translateY: uiTranslate }] },
+          ]}
+        >
           <Pressable onPress={goBack} style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.85 }]}>
             <Image source={ASSETS.back} style={styles.backIcon} resizeMode="contain" />
           </Pressable>
 
-          <Text style={[styles.topTitle, { fontSize: sizes.titleSize }]}>Nest</Text>
+          <Text style={[styles.topTitle, { fontSize: sizes.titleSize }]}>Sanctuary</Text>
 
           <View style={[styles.pill, { minWidth: sizes.pillMinW }]}>
             <Text style={styles.pillText}>🪶 {feathers}</Text>
           </View>
         </Animated.View>
 
-        {eggUnlocked && (
+        {bonusUnlocked && (
           <Animated.View
             pointerEvents="none"
             style={[
-              styles.eggCenter,
+              styles.bonusCenter,
               {
-                opacity: eggPop,
+                opacity: bonusPop,
                 transform: [
-                  { translateY: eggPop.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
-                  { scale: eggPop.interpolate({ inputRange: [0, 1], outputRange: [0.78, 1] }) },
+                  { translateY: bonusPop.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
+                  { scale: bonusPop.interpolate({ inputRange: [0, 1], outputRange: [0.78, 1] }) },
                 ],
               },
             ]}
           >
-            <Image source={ASSETS.eggGold} style={{ width: sizes.eggSize, height: sizes.eggSize }} resizeMode="contain" />
+            <Image source={ASSETS.bonusGold} style={{ width: sizes.bonusSize, height: sizes.bonusSize }} resizeMode="contain" />
           </Animated.View>
         )}
+
         <Animated.View
           style={[
             styles.bottom,
@@ -379,13 +385,13 @@ export default function NestScreen({ navigation }: any) {
               pressed && level !== 4 && { opacity: 0.92, transform: [{ scale: 0.995 }] },
             ]}
           >
-            <Text style={styles.upgradeText}>{level !== 4 ? 'Upgrade' : 'Max level'}</Text>
+            <Text style={styles.upgradeText}>{level !== 4 ? 'Improve' : 'Max level'}</Text>
             {level !== 4 && <Text style={styles.plus}>+</Text>}
           </Pressable>
 
           {level !== 4 && (
             <Text style={[styles.hint, !canUpgrade && { opacity: 0.7 }]}>
-              Need {getCostToNext(level)} 🪶 to upgrade
+              Need {getCostToNext(level)} 🪶 to improve
             </Text>
           )}
         </Animated.View>
@@ -440,7 +446,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
   },
 
-  eggCenter: {
+  bonusCenter: {
     position: 'absolute',
     left: 0,
     right: 0,

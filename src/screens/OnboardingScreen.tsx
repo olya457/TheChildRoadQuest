@@ -18,29 +18,28 @@ const PAGES = [
   {
     key: 'p1',
     bg: require('../assets/onb_1.png'),
-    text: 'One day, my child was taken away.\nLocked behind cold stone walls.\nI can’t reach them alone.',
+    text: 'One day, someone dear to me was taken away.\nLocked behind cold stone walls.\nI cannot reach them on my own.',
     button: 'Begin the Journey',
   },
   {
     key: 'p2',
     bg: require('../assets/onb_2.png'),
-    text: 'Every step forward matters.\nSolve crosswords\nto move closer.',
+    text: 'Every small step matters.\nSolve crosswords\nto move closer.',
     button: 'Move Forward',
   },
   {
     key: 'p3',
     bg: require('../assets/onb_3.png'),
-    text: 'I need to make the nest safe again.\nTests help me improve it.',
+    text: 'I need to restore the nest.\nTests help me make it stronger and safer.',
     button: 'Build the Nest',
   },
   {
     key: 'p4',
     bg: require('../assets/onb_4.png'),
-    text: 'I remember how I prepared.\nHow we laughed.\nHow everything changed.',
+    text: 'I remember how I prepared.\nThe quiet joy.\nHow everything slowly changed.',
     button: 'Listen to the Stories',
   },
 ] as const;
-
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 export default function OnboardingScreen({ navigation }: Props) {
